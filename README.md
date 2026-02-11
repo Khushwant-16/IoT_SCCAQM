@@ -1,149 +1,121 @@
-# IoT_SCCAQM
-Smart Cloud-Connected Air Quality Monitor (SCCAQM)
+# IoT_SCCAQM  
+## Smart Cloud-Connected Air Quality Monitor (SCCAQM)
 
-Overview
+---
 
-SCCAQM is an advanced IoT ecosystem designed to solve the problem of environmental sensor drift in low-cost gas sensors. By deploying an Adaptive Multi-Sensor Fusion Model (AMSFM), the system provides high-precision air quality diagnostics, energy-aware automation, and context-aware security logic synced with a real-time web dashboard.
+## 📌 Overview
 
-System Architecture
+**SCCAQM** is an advanced IoT ecosystem designed to solve the problem of **environmental sensor drift** in low-cost gas sensors. By deploying an **Adaptive Multi-Sensor Fusion Model (AMSFM)**, the system delivers:
 
-The interaction between the Sensing Layer, Processing (Edge AI), Cloud Layer, and Actuation Layer.
+- High-precision air quality diagnostics  
+- Energy-aware automation  
+- Context-aware security logic  
+- Real-time cloud synchronization with a live web dashboard  
 
-<img width="502" height="414" alt="image" src="https://github.com/user-attachments/assets/fd81c04a-6a49-4471-89da-3ddb3ccd7adf" />
+This solution bridges **Edge AI, IoT sensing, and cloud intelligence** to create a scalable smart-environment monitoring platform.
 
-Core Features
+---
 
-AMSFM Calibration (ML): Uses a Linear Regression model trained on 12.7 Million records to neutralize Temperature and Humidity interference on MQ-series sensors.
+## 🏗️ System Architecture
 
-Dual-Mode Security Engine: Bi-directional cloud synchronization allows the device to switch between Intrusion Detection (Away Mode) and Seismic Event Detection (Home Mode).
+The system is structured into four logical layers:
 
-Energy-Aware Actuation: Intelligent Servo-driven ventilation that chooses between "Passive Cooling" (closing curtains to block heat) and "Passive Ventilation" (opening curtains for fresh air).
+- **Sensing Layer** – Environmental and safety sensors  
+- **Processing Layer (Edge AI)** – ESP32 performs real-time calibration and decision-making  
+- **Cloud Layer** – Firebase Firestore and Cloud Functions for synchronization  
+- **Actuation Layer** – Intelligent mechanical and security responses  
 
-Real-Time Analytics: A comprehensive web dashboard featuring live gauges and historical time-series charts for trend analysis.
+![System Architecture](https://github.com/user-attachments/assets/fd81c04a-6a49-4471-89da-3ddb3ccd7adf)
 
-Hardware Prototype
+---
 
-Pin Mapping (ESP32 WROOM)
+## 🚀 Core Features
 
-Component
+### 🔹 AMSFM Calibration (Machine Learning)
+- Linear Regression model trained on **12.7 million records**
+- Neutralizes **temperature and humidity interference** in MQ-series gas sensors
+- Enables **accurate CO and VOC detection** using low-cost hardware
 
-ESP32 Pin
+### 🔹 Dual-Mode Security Engine
+- **Away Mode:** Intrusion detection using vibration (SW-420)
+- **Home Mode:** Seismic or shock event detection
+- Mode selection synchronized bi-directionally via cloud configuration
 
-Type
+### 🔹 Energy-Aware Actuation
+- Servo-driven intelligent ventilation system
+- Chooses between:
+  - **Passive Cooling:** Closing curtains to block heat
+  - **Passive Ventilation:** Opening curtains for fresh air circulation
 
-Function
+### 🔹 Real-Time Analytics Dashboard
+- Live sensor gauges
+- Historical time-series charts
+- Trend analysis using Chart.js
 
-DHT22
+---
 
-GPIO 4
+## 🔌 Hardware Prototype
 
-Digital
+### 📍 Pin Mapping (ESP32 WROOM)
 
-Temp & Humidity
+| Component        | ESP32 Pin       | Type     | Function                         |
+|------------------|-----------------|----------|----------------------------------|
+| DHT22            | GPIO 4          | Digital  | Temperature & Humidity           |
+| MQ-7 (CO)        | GPIO 36 (VP)    | Analog   | Carbon Monoxide Sensing          |
+| MQ-9 (VOC/CH₄)   | GPIO 39 (VN)    | Analog   | VOC / Methane Detection          |
+| Flame Sensor     | GPIO 33         | Digital  | Fire Detection                   |
+| SW-420           | GPIO 25         | Digital  | Vibration / Shock Detection      |
+| SG90 Servo       | GPIO 32         | PWM      | Window / Curtain Control         |
+| I2C LCD          | GPIO 21 / 22    | I2C      | Local Status Display (Optional)  |
 
-MQ-7 (CO)
+![Hardware Prototype](https://github.com/user-attachments/assets/4de4339a-d309-42ee-9db4-ea7451ddaa1b)
 
-GPIO 36 (VP)
+---
 
-Analog
+## 🧠 Software & ML Stack
 
-Raw CO Sensing
+### Firmware
+- **Language:** C++  
+- **Framework:** Arduino (ESP32)
 
-MQ-9 (VOC)
+### Cloud Backend
+- Firebase Firestore  
+- Node.js Cloud Functions  
 
-GPIO 39 (VN)
+### Frontend
+- HTML5  
+- Tailwind CSS  
+- JavaScript  
+- Chart.js  
 
-Analog
+### Machine Learning
+- Python  
+- Scikit-learn  
+- Pandas (Time-series resampling)
 
-Raw VOC/CH4 Sensing
+---
 
-Flame Sensor
+## 🤖 Machine Learning: Adaptive Multi-Sensor Fusion Model (AMSFM)
 
-GPIO 33
+Low-cost MQ sensors suffer from **chemical drift**, where changes in temperature and humidity falsely resemble gas concentration variations.
 
-Digital
-
-Fire Detection
-
-SW-420
-
-GPIO 25
-
-Digital
-
-Vibration/Shock
-
-SG90 Servo
-
-GPIO 32
-
-PWM
-
-Window/Curtain Control
-
-I2C LCD
-
-21 (SDA), 22 (SCL)
-
-I2C
-
-Local Status (Optional)
-
-<img width="502" height="265" alt="image" src="https://github.com/user-attachments/assets/4de4339a-d309-42ee-9db4-ea7451ddaa1b" />
-
-
-Software & ML Stack
-
-Firmware: C++ / Arduino Framework (ESP32)
-
-Cloud Backend: Firebase Firestore & Node.js Cloud Functions
-
-Frontend: HTML5, Tailwind CSS, JavaScript (Chart.js)
-
-ML Development: Python, Scikit-learn, Pandas (Time-series Resampling)
-
-Machine Learning: The AMSFM
-
-The core innovation is the Adaptive Multi-Sensor Fusion Model. Standard MQ sensors suffer from chemical "drift" where humidity and temperature changes mimic gas presence.
-
-Training: 12.7M records resampled into 1-minute intervals.
-
-Deployment: The model is optimized into a lightweight mathematical coefficient array deployed on the ESP32 (Edge AI), enabling real-time calibration without cloud latency.
-
-Installation & Setup
-
-1. Firebase Setup
-
-Create a Firebase Project.
-
-Enable Firestore Database and Anonymous Authentication.
-
-Deploy the Cloud Function provided in the /functions folder.
-
-Create a collection named config with a document system containing { "mode": "Home" }.
-
-2. Firmware Upload
-
-Install the required libraries: ArduinoJson, DHT sensor library, ESP32Servo, LiquidCrystal_I2C.
-
-Open /firmware/SCCAQM.ino.
-
-Replace WIFI_SSID, WIFI_PASS, and functionUrl with your credentials.
-
-Compile and upload to your ESP32.
-
-3. Dashboard Deployment
-
-Open /web-dashboard/index.html.
-
-Replace the firebaseConfig object with your project credentials from the Firebase Console.
-
-Open the file in any browser or host via Firebase Hosting.
-
-Repository Structure
-
-├── firmware/         # ESP32 Source Code (.ino)
-├── functions/        # Node.js Cloud Functions
-├── dashboard/        # Web Dashboard (HTML/JS)
-├── ml-model/         # Jupyter Notebook & Training Logic
-└── docs/             # Architecture and Prototype images
+### Model Highlights
+- **Training Data:** 12.7 million sensor records  
+- **Preprocessing:** Resampled to 1-minute intervals  
+- **Model:** Linear Regression  
+
+### Deployment Strategy
+- Optimized model converted into a **lightweight coefficient array**
+- Deployed directly on the **ESP32 (Edge AI)**
+- Enables **real-time calibration with zero cloud latency**
+
+---
+
+## ⚙️ Installation & Setup
+
+### 1️⃣ Firebase Setup
+1. Create a Firebase project
+2. Enable **Firestore Database**
+3. Enable **Anonymous Authentication**
+4. Deploy Cloud Functions from `/functions`
+5. Create Firestore collection:
