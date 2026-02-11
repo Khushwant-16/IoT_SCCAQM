@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCCAQM Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f4f7f6; }
+        .toggle-checkbox { display: none; }
+        .toggle-label {
+            display: block; width: 3.5rem; height: 2rem; border-radius: 9999px;
+            background-color: #D1D5DB; cursor: pointer; position: relative; transition: all 0.2s;
+        }
+        .toggle-label:after {
+            content: ''; display: block; width: 1.5rem; height: 1.5rem; border-radius: 9999px;
+            background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: absolute; top: 4px; left: 4px; transition: all 0.2s;
+        }
+        .toggle-checkbox:checked + .toggle-label { background-color: #2563EB; }
+        .toggle-checkbox:checked + .toggle-label:after { left: calc(100% - 1.5rem - 4px); }
+        .nav-tab { @apply px-4 py-2 font-medium text-slate-500 rounded-lg cursor-pointer transition-all; }
+        .nav-tab.active { @apply bg-white text-blue-600 shadow-md; }
+    </style>
+</head>
+<body class="bg-gray-100 text-slate-900">
+
+    <div class="w-full max-w-7xl mx-auto p-4 md:p-8">
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row justify-between items-center mb-6 bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+            <div>
+                <h1 class="text-3xl font-bold text-slate-800">SCCAQM Dashboard</h1>
+                <p class="text-lg text-slate-500">Smart Cloud-Connected Air Quality Monitor</p>
+            </div>
+            <nav class="flex space-x-2 bg-gray-100 p-2 rounded-xl mt-4 md:mt-0">
+                <button id="nav-dashboard" class="nav-tab active" onclick="showPage('dashboard')">
+                    <i data-feather="grid" class="w-4 h-4 inline-block mr-1"></i> Dashboard
+                </button>
+                <button id="nav-analytics" class="nav-tab" onclick="showPage('analytics')">
+                    <i data-feather="bar-chart-2" class="w-4 h-4 inline-block mr-1"></i> Analytics
+                </button>
+            </nav>
+        </header>
+
+        <!-- Dashboard Page -->
+        <div id="dashboard-page">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-1 space-y-6">
+                    <!-- Status Card -->
+                    <div id="status-card" class="bg-white border border-gray-200 rounded-2xl p-6 shadow-lg transition-all duration-500">
+                        <div class="flex items-center space-x-4">
+                            <div id="status-icon-container" class="bg-gray-100 p-3 rounded-full">
+                                <i id="status-icon" data-feather="shield" class="w-8 h-8 text-gray-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-slate-500">System Status</p>
+                                <p id="status-text" class="text-2xl font-bold text-slate-800">Connecting...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Controls -->
+                    <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-lg">
+                        <h2 class="text-xl font-semibold text-slate-800 mb-5">System Controls</h2>
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center space-x-3">
+                                <i data-feather="users" class="w-6 h-6 text-slate-500"></i>
+                                <span class="text-lg font-medium text-slate-700">Cabin Mode</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <span id="mode-text-home" class="font-semibold text-blue-600">Home</span>
+                                <div class="relative">
+                                    <input type="checkbox" id="mode-toggle" class="toggle-checkbox" />
+                                    <label for="mode-toggle" class="toggle-label"></label>
+                                </div>
+                                <span id="mode-text-away" class="font-medium text-slate-400">Away</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actuator -->
+                    <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-lg">
+                        <div class="flex items-center space-x-4">
+                            <i data-feather="move" class="w-8 h-8 text-slate-500"></i>
+                            <div>
+                                <p class="text-sm text-slate-500">Actuator Status</p>
+                                <p id="actuator-text" class="text-2xl font-bold text-slate-800">---</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sensor Grid -->
+                <div class="lg:col-span-2 grid grid-cols-2 gap-6">
+                    <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-lg">
+                        <div class="flex items-center justify-between mb-4">
+                            <p class="text-lg font-medium text-slate-600">Temperature</p>
+                            <i data-feather="thermometer" class="w-6 h-6 text-red-500"></i>
+                        </div>
+                        <p class="text-5xl font-bold text-slate-800"><span id="temp-value">--.-</span><span class="text-3xl text-slate-400">°C</span></p>
+                        <p class="text-md text-slate-500 mt-2">Heat Index: <span id="comfort-value">--.-</span>°C</p>
+                    </div>
+                    <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-lg">
+                        <div class="flex items-center justify-between mb-4">
+                            <p class="text-lg font-medium text-slate-600">Humidity</p>
+                            <i data-feather="droplet" class="w-6 h-6 text-blue-500"></i>
+                        </div>
+                        <p class="text-5xl font-bold text-slate-800"><span id="humid-value">--</span><span class="text-3xl text-slate-400">%</span></p>
+                    </div>
+                    <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-lg">
+                        <div class="flex items-center justify-between mb-4">
+                            <p class="text-lg font-medium text-slate-600">Calibrated CO</p>
+                            <i data-feather="alert-triangle" class="w-6 h-6 text-yellow-500"></i>
+                        </div>
+                        <p class="text-5xl font-bold text-slate-800"><span id="co-value">--</span><span class="text-3xl text-slate-400">ppm</span></p>
+                    </div>
+                    <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-lg">
+                        <div class="flex items-center justify-between mb-4">
+                            <p class="text-lg font-medium text-slate-600">Calibrated VOC</p>
+                            <i data-feather="wind" class="w-6 h-6 text-green-500"></i>
+                        </div>
+                        <p class="text-5xl font-bold text-slate-800"><span id="voc-value">--</span><span class="text-3xl text-slate-400">ppm</span></p>
+                    </div>
+                </div>
+            </div>
+            <div id="last-updated" class="text-center text-sm text-slate-400 mt-6">Connecting to live data...</div>
+        </div>
+
+        <!-- Analytics Page -->
+        <div id="analytics-page" class="hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-slate-800">Historical Analysis</h2>
+                <div class="flex space-x-2">
+                    <select id="log-limit" class="bg-white border border-gray-300 rounded-lg px-3 py-2">
+                        <option value="100">Last 100 Logs</option>
+                        <option value="500">Last 500 Logs</option>
+                        <option value="1000">Last 1000 Logs</option>
+                    </select>
+                    <button id="refresh-charts" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium shadow-md">Refresh</button>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+                    <h3 class="text-lg font-semibold mb-4 text-center">Status Distribution</h3>
+                    <div class="max-w-xs mx-auto"><canvas id="statusPieChart"></canvas></div>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+                    <h3 class="text-lg font-semibold mb-4">Data Summary</h3>
+                    <div class="space-y-4" id="summary-container">
+                        <p>Total Logs: <span id="summary-total" class="font-bold">--</span></p>
+                        <p>Avg Temp: <span id="summary-avg-temp" class="font-bold">--</span></p>
+                        <p>Max Heat Index: <span id="summary-max-comfort" class="font-bold">--</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-200"><canvas id="tempChart"></canvas></div>
+                <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-200"><canvas id="humidChart"></canvas></div>
+                <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-200"><canvas id="coChart"></canvas></div>
+                <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-200"><canvas id="vocChart"></canvas></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot, setDoc, getDoc, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        // SANITIZED CONFIG: Replace with your own values on GitHub
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.firebasestorage.app",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID",
+            measurementId: "YOUR_MEASUREMENT_ID"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        
+        // Navigation and UI elements
+        const dashboardPage = document.getElementById("dashboard-page");
+        const analyticsPage = document.getElementById("analytics-page");
+        const modeToggle = document.getElementById("mode-toggle");
+
+        window.showPage = (pageName) => {
+            dashboardPage.classList.toggle('hidden', pageName !== 'dashboard');
+            analyticsPage.classList.toggle('hidden', pageName !== 'analytics');
+            if (pageName === 'analytics') loadAnalyticsData();
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                setupDashboardListener();
+                setupControls();
+            } else {
+                signInAnonymously(auth);
+            }
+        });
+
+        function setupDashboardListener() {
+            // Updated to match sanitized backend collection names
+            onSnapshot(doc(db, "status", "device_latest"), (snapshot) => {
+                if (snapshot.exists()) updateDashboardUI(snapshot.data());
+            });
+        }
+
+        async function setupControls() {
+            const configDoc = doc(db, "config", "system");
+            const snap = await getDoc(configDoc);
+            if (snap.exists()) updateToggleUI(snap.data().mode);
+
+            modeToggle.addEventListener('change', async (e) => {
+                const mode = e.target.checked ? "Away" : "Home";
+                updateToggleUI(mode);
+                await setDoc(configDoc, { mode });
+            });
+        }
+
+        // ... [Rest of your UI update and Chart logic remains the same] ...
+        // Note: Remember to update 'cabin_latest' references to 'device_latest' in your Chart logic too.
+
+        feather.replace();
+    </script>
+</body>
+</html>
